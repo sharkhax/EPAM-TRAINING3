@@ -1,42 +1,61 @@
 package com.drobot.day3.entity;
 
+import com.drobot.day3.exception.BasketException;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Basket {
 
     private final List<Ball> ballList = new ArrayList<>();
+    private final double capacity;
 
-    private double initialCapacity;
-    private double vacantCapacity;
-
-    public Basket(double initialCapacity) {
-        this.initialCapacity = initialCapacity;
-        vacantCapacity = initialCapacity;
+    public Basket(double capacity) {
+        this.capacity = capacity;
     }
 
-    public double getInitialCapacity() {
-        return initialCapacity;
-    }
-
-    public void setInitialCapacity(double initialCapacity) {
-        this.initialCapacity = initialCapacity;
-    }
-
-    public double getVacantCapacity() {
-        return vacantCapacity;
-    }
-
-    public void setVacantCapacity(double vacantCapacity) {
-        this.vacantCapacity = vacantCapacity;
+    public double getCapacity() {
+        return capacity;
     }
 
     public List<Ball> getBallList() {
         return ballList;
     }
 
-    public void addBall(Ball ball) {
-        ballList.add(ball);
+    public boolean addBall(Ball... ball) throws BasketException {
+        int ballCounter = 0;
+        double ballSize;
+        double vacantCapacity = calculateVacantCapacity();
+
+        for (Ball i : ball) {
+            ballCounter++;
+            ballSize = i.calculateBallSize();
+
+            if (doesBallFitBasket(ballSize, vacantCapacity)) {
+                ballList.add(i);
+                vacantCapacity = vacantCapacity - ballSize;
+
+            } else {
+                throw new BasketException("Ball number "
+                        + ballCounter + " was not added: no capacity");
+            }
+        }
+
+        return true;
+    }
+    
+    public double calculateVacantCapacity() {
+        double vacantCapacity = capacity;
+
+        for (Ball ball : ballList) {
+            vacantCapacity = vacantCapacity - ball.calculateBallSize();
+        }
+
+        return vacantCapacity;
+    }
+
+    private boolean doesBallFitBasket(double ballSize, double vacantCapacity) {
+        return (vacantCapacity >= ballSize);
     }
 
     @Override
@@ -51,11 +70,7 @@ public class Basket {
 
         Basket basket = (Basket) o;
 
-        if (Double.compare(basket.initialCapacity, initialCapacity) != 0) {
-            return false;
-        }
-
-        if (Double.compare(basket.vacantCapacity, vacantCapacity) != 0) {
+        if (Double.compare(basket.capacity, capacity) != 0) {
             return false;
         }
 
@@ -64,16 +79,10 @@ public class Basket {
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        result = ballList.hashCode();
+        int result = ballList.hashCode();
+        long temp = Double.doubleToLongBits(capacity);
 
-        temp = Double.doubleToLongBits(initialCapacity);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-
-        temp = Double.doubleToLongBits(vacantCapacity);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-
         return result;
     }
 
@@ -81,11 +90,9 @@ public class Basket {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Basket{");
 
-        sb.append("balls=").append(ballList.size());
-        sb.append(", initial capacity=").append(initialCapacity);
-        sb.append(", vacant capacity=").append(vacantCapacity);
+        sb.append("ballList=").append(ballList);
+        sb.append(", capacity=").append(capacity);
         sb.append('}');
-
         return sb.toString();
     }
 }

@@ -3,38 +3,35 @@ package com.drobot.day3.entity;
 public class Ball {
 
     private static final String[] COLOR_LIST = {"BLUE", "PURPLE", "GREEN"};
-    private static final double WEIGHT_TO_SIZE_RATIO = 0.2;
 
-    private double weight;
-    private int colorCode;
+    private final double density;
+    private final double weight;
+    private final int colorCode;
 
-    public Ball(double weight, int color) {
+    public Ball(double weight, int colorCode, double density) {
         this.weight = weight;
-        this.colorCode = color;
+        this.colorCode = colorCode;
+        this.density = density;
     }
 
     public double getWeight() {
         return weight;
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
-
     public int getColorCode() {
         return colorCode;
-    }
-
-    public void setColorCode(int colorCode) {
-        this.colorCode = colorCode;
     }
 
     public String getStringColor() {
         return COLOR_LIST[colorCode];
     }
 
-    public double getWeightToSizeRatio() {
-        return WEIGHT_TO_SIZE_RATIO;
+    public double getDensity() {
+        return density;
+    }
+
+    public double calculateBallSize() {
+        return (weight * density);
     }
 
     @Override
@@ -49,22 +46,26 @@ public class Ball {
 
         Ball ball = (Ball) o;
 
-        if (Double.compare(ball.weight, weight) != 0) {
+        if (Double.compare(ball.density, density) != 0) {
             return false;
         }
 
+        if (Double.compare(ball.weight, weight) != 0) {
+            return false;
+        }
         return colorCode == ball.colorCode;
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
+        long temp = Double.doubleToLongBits(density);
+        int result = (int) (temp ^ (temp >>> 32));
 
         temp = Double.doubleToLongBits(weight);
-        result = (int) (temp ^ (temp >>> 32));
 
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
         result = 31 * result + colorCode;
+
         return result;
     }
 
@@ -72,10 +73,10 @@ public class Ball {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Ball{");
 
-        sb.append("weight=").append(weight);
-        sb.append(", color=").append(colorCode);
+        sb.append("density=").append(density);
+        sb.append(", weight=").append(weight);
+        sb.append(", colorCode=").append(colorCode);
         sb.append('}');
-
         return sb.toString();
     }
 }
